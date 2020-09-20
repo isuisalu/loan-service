@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,9 +26,9 @@ public class LoanController {
     @Value("${loan.statistics_window}")
     private int statisticsWindow;
 
-    private Map<String, Map<String, LoanContractApprovement>> pendingLoanApprovements =
+    private final Map<String, Map<String, LoanContractApprovement>> pendingLoanApprovements =
             new ConcurrentHashMap<>();
-    private List<LoanContractApprovement> approvedLoanContracts =
+    private final List<LoanContractApprovement> approvedLoanContracts =
             Collections.synchronizedList(new ArrayList<>());
 
     @PostMapping(APPROVAL_PATH)
@@ -82,7 +81,7 @@ public class LoanController {
     @ResponseBody
     public List<LoanContractApprovement> getPendingApprovements(@NotNull @RequestParam String approver) {
         final List<LoanContractApprovement> approvements = new ArrayList<>();
-        pendingLoanApprovements.values().stream().forEach(a -> {
+        pendingLoanApprovements.values().forEach(a -> {
             LoanContractApprovement approvement = a.get(approver);
             if (approvement != null) {
                 approvements.add(approvement);
@@ -93,10 +92,9 @@ public class LoanController {
     @GetMapping(APPROVED_PATH)
     @ResponseBody
     public List<LoanContractApprovement> getApprovedLoanContracts(@NotNull @RequestParam String customerId) {
-        List<LoanContractApprovement> result = approvedLoanContracts.stream()
+        return approvedLoanContracts.stream()
             .filter(l -> l.getLoanContract().getCustomerId().equals(customerId))
                 .collect(Collectors.toList());
-        return result;
      }
 
     @GetMapping(STATS_PATH)
@@ -115,11 +113,8 @@ public class LoanController {
             .collect(Collectors.toList()));
     }
     private boolean allChecked(Map<String, LoanContractApprovement> loanApprovements) {
-        if (!loanApprovements.values().stream().anyMatch(a ->
-                LoanContractApprovement.State.PENDING.compareTo(a.getState()) == 0)) {
-            return true;
-        }
-        return false;
+        return loanApprovements.values().stream().noneMatch(a ->
+                LoanContractApprovement.State.PENDING.compareTo(a.getState()) == 0);
     }
     private void sendApprovedLoanToCustomer(LoanContract loan) {
 

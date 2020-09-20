@@ -10,6 +10,7 @@ plugins {
     id 'io.freefair.lombok' version '5.2.1'
     id 'org.springframework.boot' version '2.3.2.RELEASE'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+    id 'com.bmuschko.docker-spring-boot-application' version '6.3.0'
 }
 
 group 'org.example'
@@ -19,19 +20,29 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    all*.exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+}
 test {
     useJUnitPlatform()
+}
+docker {
+    springBootApplication {
+        baseImage = 'openjdk:11'
+        ports = [8080]
+        images = ['example-loan-service:latest']
+        jvmArgs = ['-Xmx2048m']
+    }
 }
 dependencies {
     compileOnly 'org.projectlombok:lombok:${lombokVersion}'
     annotationProcessor 'org.projectlombok:lombok:${lombokVersion}'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-undertow'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     testCompile 'io.rest-assured:rest-assured:4.3.1'
     testCompile 'com.google.code.gson:gson:2.8.6'
-
-    //testImplementation 'junit:junit:${junitVersion}'
 }

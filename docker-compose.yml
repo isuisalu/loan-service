@@ -1,0 +1,7 @@
+version: "3.2"
+
+services:
+  loan-service:
+    image: "example-loan-service"
+    ports:
+      - "8080:8080"

@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import static org.example.loan.api.LoanContractApprovement.State.APPROVED;
 import static org.example.loan.impl.LoanController.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -101,14 +102,14 @@ public class LoanControllerTest {
         Gson gson = new Gson();
 
         LoanContractApprovement[] approvements = gson.fromJson(json, LoanContractApprovement[].class);
-        assertTrue(approvements.length == 1);
+        assertEquals(approvements.length, 1);
 
         LoanContractApprovement approvement = approvements[0];
 
-        assertTrue(approvement.getApprover().equals(approver));
-        assertTrue(approvement.getApprovementTime() == 0);
-        assertTrue(approvement.getState()
-                .compareTo(LoanContractApprovement.State.PENDING) == 0);
+        assertEquals(approver, approvement.getApprover());
+        assertEquals(approvement.getApprovementTime(), 0);
+        assertEquals(approvement.getState()
+                .compareTo(LoanContractApprovement.State.PENDING), 0);
 
         approvement.setState(APPROVED);
 
@@ -117,9 +118,5 @@ public class LoanControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
                 .andExpect(status().isOk());
-    }
-
-    public void testOnlyOnePendingApproval() {
-
     }
 }

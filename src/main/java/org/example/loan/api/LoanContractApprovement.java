@@ -20,6 +20,6 @@ public class LoanContractApprovement {
     private State state;
 
     public enum State {
-        PENDING, APPROVED, REJECTED;
+        PENDING, APPROVED, REJECTED
     }
 }

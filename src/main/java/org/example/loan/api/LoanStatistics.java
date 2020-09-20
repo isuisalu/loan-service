@@ -3,7 +3,7 @@ package org.example.loan.api;
 import lombok.Value;
 
 import java.math.BigDecimal;
-import java.util.Comparator;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Value
@@ -19,12 +19,14 @@ public class LoanStatistics {
     public LoanStatistics(List<BigDecimal> loanApprovementAmounts) {
         this.count = loanApprovementAmounts.size();
         this.sum = loanApprovementAmounts.stream()
-                .reduce(ZERO, (a, b) -> a.add(b));
-        this.average = this.count > 0 ? this.sum.divide(new BigDecimal((long)this.count)) :
+                .reduce(ZERO, BigDecimal::add);
+        this.average = this.count > 0 ?
+                this.sum.divide(new BigDecimal((long)this.count),
+                        RoundingMode.HALF_UP) :
                 ZERO;
         this.min = loanApprovementAmounts.stream()
-                .min((o1, o2) -> o1.compareTo(o2)).get();
+                .min(BigDecimal::compareTo).get();
         this.max = loanApprovementAmounts.stream()
-                .max((o1, o2) -> o1.compareTo(o2)).get();
+                .max(BigDecimal::compareTo).get();
     }
 }
