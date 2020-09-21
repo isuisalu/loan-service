@@ -1,5 +1,6 @@
 package org.example.loan.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.loan.api.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 public class LoanController {
 
@@ -46,7 +48,10 @@ public class LoanController {
             loanApprovements.put(a, new LoanContractApprovement(request.getLoanContract(),
                     a, 0, LoanContractApprovement.State.PENDING));
         });
-        return ResponseEntity.ok("Loan is sent for approval");
+        String msg = String.format("Loan for customer '%s' is sent for approval",
+                request.getLoanContract().getCustomerId());
+        log.info(msg);
+        return ResponseEntity.ok(msg);
     }
 
     @PostMapping(APPROVE_PATH)
@@ -74,8 +79,10 @@ public class LoanController {
             loanApprovements.clear();
             sendApprovedLoanToCustomer(approvement.getLoanContract());
         }
-        return ResponseEntity.ok(String.format("Loan approved by %s",
-                request.getLoanApprovement().getApprover()));
+        String msg = String.format("Loan approved by %s",
+                request.getLoanApprovement().getApprover());
+        log.info(msg);
+        return ResponseEntity.ok(msg);
     }
     @GetMapping(APPROVEMENTS_PATH)
     @ResponseBody
